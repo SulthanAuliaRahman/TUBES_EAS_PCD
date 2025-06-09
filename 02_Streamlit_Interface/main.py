@@ -1,4 +1,5 @@
 import streamlit as st
+from pushupCounter import display_pushup_counter_page
 
 # Konfigurasi halaman
 st.set_page_config(page_title="Pose Detection App", layout="wide")
@@ -6,7 +7,7 @@ st.set_page_config(page_title="Pose Detection App", layout="wide")
 # Sidebar untuk navigasi
 page = st.sidebar.selectbox(
     "Pilih Halaman",
-    ["Home", "Capture"]
+    ["Home", "PushUpCounter"]
 )
 
 # Logika untuk menampilkan halaman berdasarkan pilihan
@@ -16,8 +17,7 @@ if page == "Home":
     # Placeholder untuk konten Home
     st.write("Konten Home akan ditambahkan di sini.")
 
-elif page == "Capture":
-    st.title("Capture Gesture")
-    st.write("Halaman untuk menangkap gerakan.")
-    # Placeholder untuk konten Capture Gesture
-    st.write("Konten Capture Gesture akan ditambahkan di sini.")
+elif page == "PushUpCounter":
+    st.title("Push-up Counter")
+    st.write("Halaman untuk menghitung jumlah push-up.")
+    display_pushup_counter_page()
