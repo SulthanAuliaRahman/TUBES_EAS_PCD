@@ -1,6 +1,7 @@
 import streamlit as st
 from capture import display_capture_page
 from train import display_train_page
+from test import display_test_page
 
 # Konfigurasi halaman
 st.set_page_config(page_title="Pose Detection App", layout="wide")
@@ -8,7 +9,7 @@ st.set_page_config(page_title="Pose Detection App", layout="wide")
 # Sidebar untuk navigasi
 page = st.sidebar.selectbox(
     "Pilih Halaman",
-    ["Home", "Capture", "Train"]
+    ["Home", "Capture", "Train", "Test"]
 )
 
 # Logika untuk menampilkan halaman berdasarkan pilihan
@@ -26,3 +27,8 @@ elif page == "Train":
     st.title("Train Gesture Classifier")
     st.write("Halaman untuk melatih model klasifikasi gerakan.")
     display_train_page()
+
+elif page == "Test":
+    st.title("Test Gesture Classifier")
+    st.write("Halaman untuk mengidentifikasi gerakan menggunakan model yang telah dilatih.")
+    display_test_page()
