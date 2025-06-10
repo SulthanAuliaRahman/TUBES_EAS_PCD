@@ -2,11 +2,13 @@ import streamlit as st
 import json
 import os
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import joblib
-import pandas as pd
 
 def display_train_page():
     # Streamlit session state initialization
@@ -105,6 +107,7 @@ def display_train_page():
         skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
         fold_accuracies = []
         fold_reports = []
+        classes = sorted(set(y))
 
         for fold, (train_idx, test_idx) in enumerate(skf.split(X, y), 1):
             X_train, X_test = X[train_idx], X[test_idx]
@@ -118,7 +121,7 @@ def display_train_page():
             y_pred = model.predict(X_test)
             accuracy = accuracy_score(y_test, y_pred)
             fold_accuracies.append(accuracy)
-            report = classification_report(y_test, y_pred, target_names=sorted(set(y)), output_dict=True)
+            report = classification_report(y_test, y_pred, target_names=classes, output_dict=True)
             fold_reports.append((fold, accuracy, report))
             output_container.write(f"Fold {fold} - Akurasi: {accuracy:.2f}")
 
@@ -143,12 +146,37 @@ def display_train_page():
         })
         st.bar_chart(chart_data.set_index("Fold"))
 
-        # Step 4: Train final model on all data
+        # Step 4: Visualize Confusion Matrix and Class Distribution in columns
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            output_container.subheader("Confusion Matrix (Last Fold)")
+            cm = confusion_matrix(y_test, y_pred, labels=classes)
+            fig, ax = plt.subplots(figsize=(3, 2.5))  # Small fixed size
+            sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes, cbar=False)
+            plt.title('Confusion Matrix', fontsize=8)
+            plt.xlabel('Prediksi', fontsize=7)
+            plt.ylabel('Aktual', fontsize=7)
+            plt.tight_layout()
+            output_container.pyplot(fig)
+
+        with col2:
+            output_container.subheader("Distribusi Kelas")
+            class_counts = pd.Series(labels).value_counts()
+            fig, ax = plt.subplots(figsize=(3, 2.5))  # Small fixed size
+            sns.barplot(x=class_counts.index, y=class_counts.values)
+            plt.title('Distribusi Kelas', fontsize=8)
+            plt.xlabel('Kelas', fontsize=7)
+            plt.ylabel('Jumlah', fontsize=7)
+            plt.tight_layout()
+            output_container.pyplot(fig)
+
+        # Step 5: Train final model on all data
         final_model = RandomForestClassifier(n_estimators=100, random_state=42)
         final_model.fit(X, y)
         output_container.write("\nMelatih model akhir pada seluruh data...")
 
-        # Step 5: Save the final model
+        # Step 6: Save the final model
         joblib.dump(final_model, 'gesture_classifier_cv.pkl')
         output_container.success("Model akhir disimpan sebagai 'gesture_classifier_cv.pkl'")
         st.session_state.training_status = False
