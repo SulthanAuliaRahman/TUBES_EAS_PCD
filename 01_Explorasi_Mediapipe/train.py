@@ -177,6 +177,7 @@ def display_train_page():
         output_container.write("\nMelatih model akhir pada seluruh data...")
 
         # Step 6: Save the final model
-        joblib.dump(final_model, 'gesture_classifier_cv.pkl')
+        #ubah nama menjadi sesuai dengan pose yang ingin di training
+        joblib.dump(final_model, 'gesture_classifier_cv.pkl')#  contoh(gesture_classifier_cv_situp)
         output_container.success("Model akhir disimpan sebagai 'gesture_classifier_cv.pkl'")
         st.session_state.training_status = False
