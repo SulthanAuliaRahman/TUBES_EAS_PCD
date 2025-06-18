@@ -7,8 +7,8 @@ import os
 import time
 
 # Path configuration
-MODEL_PATH = "../pose_landmarker_full.task"
-CLASSIFIER_PATH = "../gesture_classifier_cv.pkl"
+MODEL_PATH = "../01_Explorasi_Mediapipe/pose_landmarker_full.task"
+CLASSIFIER_PATH = "../01_Explorasi_Mediapipe/gesture_classifier_cv_situp.pkl"
 
 # MediaPipe setup
 BaseOptions = mp.tasks.BaseOptions
@@ -40,7 +40,7 @@ def draw_landmarks(image, landmarks):
             cv2.line(image, (x0, y0), (x1, y1), (255, 0, 0), 2)
 
 def draw_info(image, prediction, count):
-    # Draw the predicted gesture and push-up count on the image
+    # Draw the predicted gesture and sit-up count on the image
     cv2.putText(
         image,
         f"Pose: {prediction}",
@@ -53,7 +53,7 @@ def draw_info(image, prediction, count):
     )
     cv2.putText(
         image,
-        f"Push-ups: {count}",
+        f"Sit-ups: {count}",
         (10, 70),
         cv2.FONT_HERSHEY_SIMPLEX,
         1.0,
@@ -68,10 +68,10 @@ def extract_features(landmarks):
         landmark_coords.extend([landmark.x, landmark.y, landmark.z])
     return np.array([landmark_coords])
 
-def display_pushup_counter_page():
+def display_situp_counter_page():
     # Check if classifier model exists
     if not os.path.exists(CLASSIFIER_PATH):
-        st.error("Model 'gesture_classifier_cv.pkl' tidak ditemukan. Silakan latih model terlebih dahulu.")
+        st.error("Model 'situp_classifier_cv.pkl' tidak ditemukan. Silakan latih model terlebih dahulu.")
         return
 
     # Load the classifier
@@ -82,15 +82,15 @@ def display_pushup_counter_page():
         return
 
     # Streamlit session state for counter and state tracking
-    if "pushup_count" not in st.session_state:
-        st.session_state.pushup_count = 0
+    if "situp_count" not in st.session_state:
+        st.session_state.situp_count = 0
     if "last_pose" not in st.session_state:
         st.session_state.last_pose = None
-    if "last_down_time" not in st.session_state:
-        st.session_state.last_down_time = None
+    if "last_start_time" not in st.session_state:
+        st.session_state.last_start_time = None
 
     # Streamlit UI
-    st.subheader("Menghitung Push-up")
+    st.subheader("Menghitung Sit-up")
     frame_window = st.image([], channels="RGB")
 
     # Initialize webcam and landmarker
@@ -124,24 +124,24 @@ def display_pushup_counter_page():
             except Exception as e:
                 predicted_gesture = f"Prediksi gagal: {str(e)}"
 
-        # Push-up counting logic
+        # Sit-up counting logic
         current_time = time.time()
-        if predicted_gesture in ["DOWN", "UP"]:
-            if st.session_state.last_pose == "DOWN" and predicted_gesture == "UP":
-                if st.session_state.last_down_time is not None:
-                    time_diff = current_time - st.session_state.last_down_time
+        if predicted_gesture in ["START", "UP"]:
+            if st.session_state.last_pose == "START" and predicted_gesture == "UP":
+                if st.session_state.last_start_time is not None:
+                    time_diff = current_time - st.session_state.last_start_time
                     if time_diff <= 1.0:  # Check if transition is within 1 second
-                        st.session_state.pushup_count += 1
-            if predicted_gesture == "DOWN":
-                st.session_state.last_down_time = current_time
+                        st.session_state.situp_count += 1
+            if predicted_gesture == "START":
+                st.session_state.last_start_time = current_time
             st.session_state.last_pose = predicted_gesture
         else:
-            # Reset last_down_time if gesture is "Lainya" or no pose detected
-            st.session_state.last_down_time = None
+            # Reset last_start_time if gesture is "Other" or no pose detected
+            st.session_state.last_start_time = None
             st.session_state.last_pose = None
 
         # Draw prediction and count on the frame
-        draw_info(frame, predicted_gesture, st.session_state.pushup_count)
+        draw_info(frame, predicted_gesture, st.session_state.situp_count)
 
         # Update UI with the annotated frame
         frame_window.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
