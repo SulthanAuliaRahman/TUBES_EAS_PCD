@@ -7,8 +7,8 @@ import os
 import time
 
 # Path configuration
-MODEL_PATH = "01_Explorasi_Mediapipe/pose_landmarker_full.task"
-CLASSIFIER_PATH = "gesture_classifier_squat_cv.pkl"
+MODEL_PATH = "../pose_landmarker_full.task"
+CLASSIFIER_PATH = "../gesture_classifier_squat_cv.pkl"
 
 # MediaPipe setup
 BaseOptions = mp.tasks.BaseOptions
