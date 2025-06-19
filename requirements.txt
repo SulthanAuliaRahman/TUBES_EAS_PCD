@@ -1,4 +1,10 @@
 streamlit
-opencv-python
-mediapipe
+opencv-contrib-python
+mediapipe==0.10.21
 numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+joblib
+Pillow

@@ -65,6 +65,10 @@ def display_capture_page():
         return
 
     landmarker = setup_pose_landmarker(MODEL_PATH)
+    
+    # Initialize manual timestamp
+    current_timestamp = 0
+    timestamp_increment = 33  # Approx. 30 FPS (1000ms / 30 ≈ 33ms per frame)
 
     # Video streaming loop
     while True:
@@ -75,8 +79,10 @@ def display_capture_page():
 
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
-        timestamp = int(cap.get(cv2.CAP_PROP_POS_MSEC)) or 0
-        result = landmarker.detect_for_video(mp_image, timestamp)
+        
+        # manual timestamp
+        result = landmarker.detect_for_video(mp_image, current_timestamp)
+        current_timestamp += timestamp_increment  # Increment for next frame
 
         # Save to session state
         st.session_state.frame = frame.copy()
